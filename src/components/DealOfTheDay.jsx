@@ -7,13 +7,18 @@ import { useNavigate } from "react-router-dom";
 export default function DealOfTheDay() {
   const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   const navigate = useNavigate();
 
+  // Load deal products
   useEffect(() => {
     getProducts()
       .then((data) => {
-        // Use products with a meaningful discount
         const deals = data
           .filter((product) => product.discountValue >= 10)
           .slice(0, 6);
@@ -24,6 +29,40 @@ export default function DealOfTheDay() {
         console.error("Failed to load deals:", error);
       });
   }, []);
+
+  // Countdown to midnight in the user's local time
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+
+      const difference = Math.max(
+        0,
+        midnight.getTime() - now.getTime()
+      );
+
+      const totalSeconds = Math.floor(
+        difference / 1000
+      );
+
+      setTimeLeft({
+        hours: Math.floor(totalSeconds / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+      });
+    };
+
+    updateCountdown();
+
+    const timer = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (value) =>
+    String(value).padStart(2, "0");
 
   const maxIndex = Math.max(products.length - 2, 0);
 
@@ -50,17 +89,18 @@ export default function DealOfTheDay() {
             </h2>
 
             <span className="text-xs md:text-sm">
-              ⏱ 22h 55m 20s remaining
+              ⏱ {formatTime(timeLeft.hours)}h{" "}
+              {formatTime(timeLeft.minutes)}m{" "}
+              {formatTime(timeLeft.seconds)}s remaining
             </span>
           </div>
 
           <button
-            onClick={() =>
-              navigate("/shop?deal=true")
-            }
+            onClick={() => navigate("/shop?deal=true")}
             className="mt-2 flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-medium md:px-5 md:py-2.5 md:text-sm"
           >
             View all
+
             <img
               src="/arrow.png"
               alt=""
@@ -77,9 +117,7 @@ export default function DealOfTheDay() {
             <div
               className="flex gap-4 transition-transform duration-500 ease-in-out md:gap-5 lg:gap-6"
               style={{
-                transform: `translateX(-${
-                  currentIndex * 50
-                }%)`,
+                transform: `translateX(-${currentIndex * 50}%)`,
               }}
             >
               {products.map((product) => (

@@ -37,13 +37,6 @@ export default function PromoBanner() {
           </button>
         </div>
       </div>
-
-      {/* Slider dots */}
-      <div className="mt-3 flex justify-center gap-1.5 md:mt-4">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#FF92A5] md:h-2 md:w-2" />
-        <span className="h-1.5 w-1.5 rounded-full bg-gray-300 md:h-2 md:w-2" />
-        <span className="h-1.5 w-1.5 rounded-full bg-gray-300 md:h-2 md:w-2" />
-      </div>
     </section>
   );
 }

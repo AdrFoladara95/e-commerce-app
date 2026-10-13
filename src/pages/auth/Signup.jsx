@@ -1,4 +1,12 @@
-import { User, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  X,
+  AlertCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaFacebookF } from "react-icons/fa";
@@ -16,36 +24,51 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] =
     useState("");
 
+  const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleSignup = (e) => {
     e.preventDefault();
+    setError("");
 
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail || !password || !confirmPassword) {
-      alert("Please fill in all fields.");
+      setError("Please fill in all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
     if (password.length < 6) {
-      alert("Password must be at least 6 characters.");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
-    const accounts =
-      JSON.parse(localStorage.getItem("accounts")) || [];
+    let accounts = [];
+
+    try {
+      accounts = JSON.parse(
+        localStorage.getItem("accounts") || "[]"
+      );
+
+      if (!Array.isArray(accounts)) {
+        accounts = [];
+      }
+    } catch {
+      accounts = [];
+    }
 
     const accountAlreadyExists = accounts.some(
       (account) =>
-        account.email.trim().toLowerCase() === normalizedEmail
+        account.email?.trim().toLowerCase() === normalizedEmail
     );
 
     if (accountAlreadyExists) {
-      alert("An account with this email already exists.");
+      setError("An account with this email already exists.");
       return;
     }
 
@@ -56,13 +79,22 @@ export default function Signup() {
 
     const updatedAccounts = [...accounts, account];
 
-    localStorage.setItem(
-      "accounts",
-      JSON.stringify(updatedAccounts)
-    );
+    try {
+      localStorage.setItem(
+        "accounts",
+        JSON.stringify(updatedAccounts)
+      );
 
-    alert("Account created successfully!");
+      setShowSuccess(true);
+    } catch {
+      setError(
+        "Unable to save your account. Please check your browser storage and try again."
+      );
+    }
+  };
 
+  const handleContinueToLogin = () => {
+    setShowSuccess(false);
     navigate("/login");
   };
 
@@ -89,8 +121,12 @@ export default function Signup() {
             <input
               type="text"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               placeholder="Username or Email"
+              autoComplete="email"
               className="ml-4 w-full bg-transparent text-[16px] text-[#333] outline-none placeholder:text-[#666]"
             />
           </div>
@@ -106,8 +142,12 @@ export default function Signup() {
             <input
               type={showPassword ? "text" : "password"}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
               placeholder="Password"
+              autoComplete="new-password"
               className="ml-4 w-full bg-transparent text-[16px] text-[#333] outline-none placeholder:text-[#666]"
             />
 
@@ -116,9 +156,7 @@ export default function Signup() {
               onClick={() => setShowPassword(!showPassword)}
               className="ml-2 shrink-0 text-[#555]"
               aria-label={
-                showPassword
-                  ? "Hide password"
-                  : "Show password"
+                showPassword ? "Hide password" : "Show password"
               }
             >
               {showPassword ? (
@@ -138,14 +176,14 @@ export default function Signup() {
             />
 
             <input
-              type={
-                showConfirmPassword ? "text" : "password"
-              }
+              type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
-              onChange={(e) =>
-                setConfirmPassword(e.target.value)
-              }
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError("");
+              }}
               placeholder="Confirm Password"
+              autoComplete="new-password"
               className="ml-4 w-full bg-transparent text-[16px] text-[#333] outline-none placeholder:text-[#666]"
             />
 
@@ -169,13 +207,25 @@ export default function Signup() {
             </button>
           </div>
 
+          {/* Validation Error */}
+          {error && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+            >
+              <AlertCircle
+                size={18}
+                className="mt-0.5 shrink-0"
+              />
+              <p>{error}</p>
+            </div>
+          )}
+
           {/* Public Offer */}
           <div className="mt-6">
             <p className="text-sm leading-6 text-[#777] md:text-base">
               By Clicking the{" "}
-              <span className="text-[#f83758]">
-                Register
-              </span>{" "}
+              <span className="text-[#f83758]">Register</span>{" "}
               button, you agree to the public offer
             </p>
           </div>
@@ -199,6 +249,7 @@ export default function Signup() {
         <div className="mt-6 flex justify-center gap-4 sm:gap-5">
           <button
             type="button"
+            aria-label="Continue with Google"
             className="flex h-13 w-13 items-center justify-center rounded-full border border-[#F83758] bg-[#f8375714] sm:h-14 sm:w-14"
           >
             <FcGoogle size={28} />
@@ -206,16 +257,15 @@ export default function Signup() {
 
           <button
             type="button"
+            aria-label="Continue with Apple"
             className="flex h-13 w-13 items-center justify-center rounded-full border border-[#F83758] bg-[#f8375714] sm:h-14 sm:w-14"
           >
-            <FaApple
-              size={27}
-              className="text-black"
-            />
+            <FaApple size={27} className="text-black" />
           </button>
 
           <button
             type="button"
+            aria-label="Continue with Facebook"
             className="flex h-13 w-13 items-center justify-center rounded-full border border-[#F83758] bg-[#f8375714] sm:h-14 sm:w-14"
           >
             <FaFacebookF
@@ -240,6 +290,67 @@ export default function Signup() {
           </button>
         </div>
       </div>
+
+      {/* Signup Success Popup */}
+      {showSuccess && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5 py-6"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowSuccess(false);
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="signup-success-title"
+            aria-describedby="signup-success-description"
+            className="relative w-full max-w-sm rounded-2xl bg-white px-6 py-8 text-center shadow-2xl sm:px-8"
+          >
+            <button
+              type="button"
+              onClick={() => setShowSuccess(false)}
+              className="absolute right-4 top-4 rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              aria-label="Close success popup"
+            >
+              <X size={21} />
+            </button>
+
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+              <CheckCircle2
+                size={48}
+                strokeWidth={1.8}
+                className="text-green-500"
+              />
+            </div>
+
+            <h2
+              id="signup-success-title"
+              className="mt-5 text-xl font-bold text-[#111827]"
+            >
+              Account Created Successfully!
+            </h2>
+
+            <p
+              id="signup-success-description"
+              className="mt-3 text-sm leading-6 text-gray-500"
+            >
+              Your account has been created. You're all set to
+              sign in and start shopping.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleContinueToLogin}
+              className="mt-7 h-12 w-full rounded-lg bg-[#F83758] px-4 font-semibold text-white transition hover:bg-[#d92f4c]"
+            >
+              Continue to Login
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

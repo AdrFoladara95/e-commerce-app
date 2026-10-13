@@ -15,7 +15,7 @@ export default function Profile() {
   const fileInputRef = useRef(null);
 
   const [profileImage, setProfileImage] = useState(avatar);
-
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -63,7 +63,7 @@ export default function Profile() {
       }
 
       setProfileImage(data.profileImage || avatar);
-
+      setFullName(data.fullName || "");
       setPassword(data.password || "");
       setMobileNumber(data.mobileNumber || "");
       setPincode(data.pincode || "");
@@ -167,6 +167,7 @@ export default function Profile() {
 
     const profileData = {
       profileImage,
+      fullName,
       email: user.email,
       password,
       mobileNumber,
@@ -332,6 +333,18 @@ export default function Profile() {
           </h2>
 
           <div className="mt-5 grid gap-5 md:grid-cols-2">
+            {/* Full Name */}
+            <div>
+              <label className="mb-2 block text-sm text-[#555]">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="h-14 w-full rounded-xl border border-gray-300 bg-gray-100 px-4 text-[16px] text-[#333] outline-none"
+              />
+            </div>
             {/* Email */}
             <div>
               <label className="mb-2 block text-sm text-[#555]">

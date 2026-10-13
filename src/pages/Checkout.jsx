@@ -86,7 +86,7 @@ export default function Checkout() {
       );
 
   const hasCompleteDeliveryDetails =
-    Boolean(profile?.accountName?.trim()) &&
+    Boolean(profile?.fullName?.trim()) &&
     Boolean(profile?.mobileNumber?.trim()) &&
     Boolean(profile?.address?.trim()) &&
     Boolean(profile?.city?.trim()) &&
@@ -261,7 +261,7 @@ export default function Checkout() {
                 {hasCompleteDeliveryDetails ? (
                   <>
                     <p className="text-sm font-semibold text-gray-900 md:text-base">
-                      {profile.accountName}
+                      {profile.fullName}
                     </p>
 
                     <p className="mt-1 text-sm text-gray-500">
